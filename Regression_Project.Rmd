@@ -1,78 +1,101 @@
 ---
-title: "Regression_Project"
+title: "Regression Project"
+author: "Sai Nivas Rangaraju, Anmol Rao Karukonda"
+date: "2024-11-11"
+output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+# Reading Data into dataframe
+
+```{r}
+data <- read.csv('insurance.csv')
+head(data)
+```
+
+# Identifying Response and Predictor Variable and their types
+
+Predictor variables:
+
+  Categorical : sex, smoker, region
+  
+  Continuous : age, bmi, children
+  
+Response variable : charges
+
+# Fitting a multiple linear regression model on all the variables
+
+```{r}
+lin_model <- lm(charges~., data = data)
+summary(lin_model)
+```
+
+
+
+```{r}
+lin_model2 <- lm(charges ~ (.-sex-region), data = data)
+summary(lin_model2)
 ```
 
 ```{r}
-data <- read.csv("C:/Users/khush/Downloads/archive/insurance.csv")
+plot(lin_model2)
 ```
 
-```{r}
-model1<-lm(charges~.,data=data)
-summary(model1)
-```
-
-```{r}
-model1<-lm(charges~.-sex,data=data)
-summary(model1)
-```
-
-```{r}
-model1<-lm(charges~.-sex-region,data=data)
-summary(model1)
-```
-
-```{r}
-model1<-lm(charges~age+bmi+children+smoker+region+sex+age*bmi+age*children+age*smoker+age*region+age*sex+bmi*children+bmi*smoker+bmi*region+bmi*sex+children*smoker+children*region+children*sex+smoker*region+smoker*sex+region*sex,data=data)
-summary(model1)
-```
-
-```{r}
-model2<-lm(charges~age+bmi+children+smoker+bmi*smoker,data=data)
-summary(model2)
-plot(model2)
-```
 
 ```{r}
 library(lmtest)
-dwtest(model2)
+bptest(lin_model2)
+```
+The Breusch-Pagan (BP) test indicates that there is heteroscedasticity in the data. So, we proceed to transform the data.
+
+
+# Log Transformation
+
+```{r}
+log_model <- lm(log(charges) ~ age+bmi+children+smoker,data=data)
+summary(log_model)
+plot(log_model)
 ```
 
 ```{r}
-model3<-lm(charges~age+bmi+children+smoker,data=data)
-library(car)
-vif(model3)
+bptest(log_model)
 ```
+This is indicating that even with the log-transform the heteroscedasticity is still present, so we use square transform.
+
 
 ```{r}
-model_log <- lm(log(charges) ~ age+bmi+children+smoker+bmi*smoker,data=data)
-summary(model_log)
-plot(model_log)
-```
-
-```{r}
-model1 <- lm(charges ~ age+bmi+children+smoker+bmi*smoker,data=data)
-
-weights <- 1 / lm(abs(residuals(model1)) ~ fitted(model1))$fitted.values^2
-
-model1_wls <- lm(charges ~ age + bmi + children + smoker + bmi*smoker, data = data, weights = weights)
-summary(model1_wls)
-plot(model1_wls)
-```
-
-```{r}
-model_square <- lm((charges^2) ~ age+bmi+children+smoker+bmi*smoker,data=data)
+model_square <- lm((charges^2) ~ age+bmi+children+smoker,data=data)
 summary(model_square)
 
 plot(model_square)
 ```
+```{r}
+bptest(model_square)
+```
+This also did not help much with the heteroscedasticity.
 
 ```{r}
-model_square_root <- lm((charges^0.5) ~ age+bmi+children+smoker+bmi*smoker,data=data)
-summary(model_square_root)
+weights <- 1 / lm(abs(residuals(lin_model2)) ~ fitted(lin_model2))$fitted.values^2
 
-plot(model_square_root)
+model_wls <- lm(charges ~ age + bmi + children + smoker, data = data, weights = weights)
+summary(model_wls)
+plot(model_wls)
 ```
+
+```{r}
+bptest(model_wls)
+```
+
+```{r}
+model <- lm(charges ~ age+bmi+children+smoker+bmi*smoker, data = data)
+summary(model)
+```
+
+```{r}
+plot(model)
+```
+
+
+```{r}
+bptest(model)
+```
+
