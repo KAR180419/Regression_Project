@@ -1,0 +1,78 @@
+---
+title: "Regression_Project"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+data <- read.csv("C:/Users/khush/Downloads/archive/insurance.csv")
+```
+
+```{r}
+model1<-lm(charges~.,data=data)
+summary(model1)
+```
+
+```{r}
+model1<-lm(charges~.-sex,data=data)
+summary(model1)
+```
+
+```{r}
+model1<-lm(charges~.-sex-region,data=data)
+summary(model1)
+```
+
+```{r}
+model1<-lm(charges~age+bmi+children+smoker+region+sex+age*bmi+age*children+age*smoker+age*region+age*sex+bmi*children+bmi*smoker+bmi*region+bmi*sex+children*smoker+children*region+children*sex+smoker*region+smoker*sex+region*sex,data=data)
+summary(model1)
+```
+
+```{r}
+model2<-lm(charges~age+bmi+children+smoker+bmi*smoker,data=data)
+summary(model2)
+plot(model2)
+```
+
+```{r}
+library(lmtest)
+dwtest(model2)
+```
+
+```{r}
+model3<-lm(charges~age+bmi+children+smoker,data=data)
+library(car)
+vif(model3)
+```
+
+```{r}
+model_log <- lm(log(charges) ~ age+bmi+children+smoker+bmi*smoker,data=data)
+summary(model_log)
+plot(model_log)
+```
+
+```{r}
+model1 <- lm(charges ~ age+bmi+children+smoker+bmi*smoker,data=data)
+
+weights <- 1 / lm(abs(residuals(model1)) ~ fitted(model1))$fitted.values^2
+
+model1_wls <- lm(charges ~ age + bmi + children + smoker + bmi*smoker, data = data, weights = weights)
+summary(model1_wls)
+plot(model1_wls)
+```
+
+```{r}
+model_square <- lm((charges^2) ~ age+bmi+children+smoker+bmi*smoker,data=data)
+summary(model_square)
+
+plot(model_square)
+```
+
+```{r}
+model_square_root <- lm((charges^0.5) ~ age+bmi+children+smoker+bmi*smoker,data=data)
+summary(model_square_root)
+
+plot(model_square_root)
+```
