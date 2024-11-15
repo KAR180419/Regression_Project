@@ -8,7 +8,6 @@ output: html_document
 
 ```{r}
 data <- read.csv("insurance.csv")
-# Using head to view the top rows of the data
 head(data)
 ```
 
@@ -214,6 +213,7 @@ Age, children, smoker, and synergy term are all significant features and togethe
 Our model is charges = -2729.002 + 264.948age + 5.656bmi + 508.924children - 20194.709smoker + 1433.788bmi*smoker
 
 For a smoker, charges = -(2729.002 + 20194.709) + 264.948age + (5.656 + 1433.788)bmi + 508.924children
+
 For a non smoker, charges = -2729.002 + 264.948age + 5.656bmi + 508.924children
 
 Charges increases by an average of beta1 for a unit average increase of age, where all other predictors are fixed
