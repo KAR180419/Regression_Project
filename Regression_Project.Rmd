@@ -1,14 +1,13 @@
 ---
 title: "Regression Project"
 author: "Sai Nivas Rangaraju, Anmol Rao Karukonda"
-date: "2024-11-11"
 output: html_document
 ---
 
 # Reading Data into dataframe
 
 ```{r}
-data <- read.csv("C:/Users/khush/Downloads/archive/insurance.csv")
+data <- read.csv("insurance.csv")
 # Using head to view the top rows of the data
 head(data)
 ```
@@ -151,9 +150,24 @@ vif(model_wls)
 
 All values are very close to 1 suggesting that there is no issue of multicollinearity
 
-# Model Observation after transform
+# Interpretation of results
 
-Age, bmi, children, and smoker are all significant features and together give the model an R-squared value of 0.5538. This means that the features together can predict 55.38% of the outputs. The average charges for a person who smokes is 22725.01 units more than for a non-smoker (keeping all other predictors fixed).
+The low p-value of the F-statistic indicates that there is at least one independent variable that helps predict the target variable.
+
+Age, bmi, children, and smoker are all significant features and together give the model an R-squared value of 0.5538. This means that the features together can predict 55.38% of the outputs.
+
+Our model is charges = -3934.17 + 243.16age + 70.29bmi + 645.13children + 22725.01smoker
+
+For a smoker, charges = 243.16age + 70.29bmi + 645.13children + (22725.01-3934.17)
+For a non smoker, charges = 243.16age + 70.29bmi + 645.13children - 3934.17
+
+For every observation, charges increases by an average of beta1*w for a unit average increase of age, where w is the weight for that observation and all other predictors are fixed
+
+For every observation, charges increases by an average of beta2*w for a unit average increase of bmi, where w is the weight for that observation and all other predictors are fixed
+
+For every observation, charges increases by an average of beta3*w for a unit average increase of children, where w is the weight for that observation and all other predictors are fixed
+
+For every observation, charges is beta4*w more for a smoker than a non-smoker, where w is the weight for that observation and all other predictors are fixed
 
 # Interaction term observation
 
@@ -190,3 +204,23 @@ bptest(interaction_term_model)
 ```
 
 BP test suggests that there is no heteroscedasticity in this model.
+
+# Interpretation of results with synergy
+
+The low p-value of the F-statistic indicates that there is at least one independent variable that helps predict the target variable.
+
+Age, children, smoker, and synergy term are all significant features and together give the model. bmi is not a significant feature as it has a high p-value but we include it due to the inclusion of the synergy term. R-squared value is 0.8388. This means that the features together can predict 83.88% of the outputs.
+
+Our model is charges = -2729.002 + 264.948age + 5.656bmi + 508.924children - 20194.709smoker + 1433.788bmi*smoker
+
+For a smoker, charges = -(2729.002 + 20194.709) + 264.948age + (5.656 + 1433.788)bmi + 508.924children
+For a non smoker, charges = -2729.002 + 264.948age + 5.656bmi + 508.924children
+
+Charges increases by an average of beta1 for a unit average increase of age, where all other predictors are fixed
+
+Charges increases by an average of beta2 for a unit average increase of bmi, where all other predictors are fixed
+
+Charges increases by an average of beta3 for a unit average increase of children, where all other predictors are fixed
+
+In case if the person is smoker, the charges decreases by an average of 20194.709 units with an average increase of 1433.788 for unit increase in bmi. This is the change over the base case of non-smoker.
+

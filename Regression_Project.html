@@ -11,7 +11,6 @@
 
 <meta name="author" content="Sai Nivas Rangaraju, Anmol Rao Karukonda" />
 
-<meta name="date" content="2024-11-11" />
 
 <title>Regression Project</title>
 
@@ -352,14 +351,13 @@ display: none;
 
 <h1 class="title toc-ignore">Regression Project</h1>
 <h4 class="author">Sai Nivas Rangaraju, Anmol Rao Karukonda</h4>
-<h4 class="date">2024-11-11</h4>
 
 </div>
 
 
 <div id="reading-data-into-dataframe" class="section level1">
 <h1>Reading Data into dataframe</h1>
-<pre class="r"><code>data &lt;- read.csv(&quot;C:/Users/khush/Downloads/archive/insurance.csv&quot;)
+<pre class="r"><code>data &lt;- read.csv(&quot;insurance.csv&quot;)
 # Using head to view the top rows of the data
 head(data)</code></pre>
 <pre><code>##   age    sex    bmi children smoker    region   charges
@@ -684,13 +682,30 @@ there is no heteroscedasticity.</p>
 <p>All values are very close to 1 suggesting that there is no issue of
 multicollinearity</p>
 </div>
-<div id="model-observation-after-transform" class="section level1">
-<h1>Model Observation after transform</h1>
+<div id="interpretation-of-results" class="section level1">
+<h1>Interpretation of results</h1>
+<p>The low p-value of the F-statistic indicates that there is at least
+one independent variable that helps predict the target variable.</p>
 <p>Age, bmi, children, and smoker are all significant features and
 together give the model an R-squared value of 0.5538. This means that
-the features together can predict 55.38% of the outputs. The average
-charges for a person who smokes is 22725.01 units more than for a
-non-smoker (keeping all other predictors fixed).</p>
+the features together can predict 55.38% of the outputs.</p>
+<p>Our model is charges = -3934.17 + 243.16age + 70.29bmi +
+645.13children + 22725.01smoker</p>
+<p>For a smoker, charges = 243.16age + 70.29bmi + 645.13children +
+(22725.01-3934.17) For a non smoker, charges = 243.16age + 70.29bmi +
+645.13children - 3934.17</p>
+<p>For every observation, charges increases by an average of beta1*w for
+a unit average increase of age, where w is the weight for that
+observation and all other predictors are fixed</p>
+<p>For every observation, charges increases by an average of beta2*w for
+a unit average increase of bmi, where w is the weight for that
+observation and all other predictors are fixed</p>
+<p>For every observation, charges increases by an average of beta3*w for
+a unit average increase of children, where w is the weight for that
+observation and all other predictors are fixed</p>
+<p>For every observation, charges is beta4*w more for a smoker than a
+non-smoker, where w is the weight for that observation and all other
+predictors are fixed</p>
 </div>
 <div id="interaction-term-observation" class="section level1">
 <h1>Interaction term observation</h1>
@@ -803,6 +818,31 @@ not have influential points.</p>
 ## BP = 7.0967, df = 5, p-value = 0.2136</code></pre>
 <p>BP test suggests that there is no heteroscedasticity in this
 model.</p>
+</div>
+<div id="interpretation-of-results-with-synergy" class="section level1">
+<h1>Interpretation of results with synergy</h1>
+<p>The low p-value of the F-statistic indicates that there is at least
+one independent variable that helps predict the target variable.</p>
+<p>Age, children, smoker, and synergy term are all significant features
+and together give the model. bmi is not a significant feature as it has
+a high p-value but we include it due to the inclusion of the synergy
+term. R-squared value is 0.8388. This means that the features together
+can predict 83.88% of the outputs.</p>
+<p>Our model is charges = -2729.002 + 264.948age + 5.656bmi +
+508.924children - 20194.709smoker + 1433.788bmi*smoker</p>
+<p>For a smoker, charges = -(2729.002 + 20194.709) + 264.948age + (5.656
++ 1433.788)bmi + 508.924children For a non smoker, charges = -2729.002 +
+264.948age + 5.656bmi + 508.924children</p>
+<p>Charges increases by an average of beta1 for a unit average increase
+of age, where all other predictors are fixed</p>
+<p>Charges increases by an average of beta2 for a unit average increase
+of bmi, where all other predictors are fixed</p>
+<p>Charges increases by an average of beta3 for a unit average increase
+of children, where all other predictors are fixed</p>
+<p>In case if the person is smoker, the charges decreases by an average
+of 20194.709 units with an average increase of 1433.788 for unit
+increase in bmi. This is the change over the base case of
+non-smoker.</p>
 </div>
 
 
