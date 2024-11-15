@@ -224,3 +224,19 @@ Charges increases by an average of beta3 for a unit average increase of children
 
 In case if the person is smoker, the charges decreases by an average of 20194.709 units with an average increase of 1433.788 for unit increase in bmi. This is the change over the base case of non-smoker.
 
+
+The below plot is useful to explain the difference in charges based on bmi and smoker interaction:
+
+```{r}
+library(ggplot2)
+
+ggplot(data, aes(x = bmi, y = charges, color = smoker)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm") +
+  scale_y_continuous(labels = scales::dollar_format()) +
+  labs(title = "Interaction between BMI and Smoking Status on Insurance Charges",
+       x = "BMI",
+       y = "Insurance Charges",
+       color = "Smoker") +
+  theme_minimal()
+```
