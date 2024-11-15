@@ -8,7 +8,8 @@ output: html_document
 # Reading Data into dataframe
 
 ```{r}
-data <- read.csv('insurance.csv')
+data <- read.csv("C:/Users/khush/Downloads/archive/insurance.csv")
+# Using head to view the top rows of the data
 head(data)
 ```
 
@@ -28,23 +29,50 @@ Response variable : charges
 lin_model <- lm(charges~., data = data)
 summary(lin_model)
 ```
+As observed, sex predictor has a high p-value. So we cannot reject the null hypothesis. This is not a significant predictor.
 
+# Fitting a multiple linear regression model on all the variables except 'sex'
 
+```{r}
+lin_model <- lm(charges~.-sex, data = data)
+summary(lin_model)
+```
+
+As observed, region predictor has a high p-value. So we cannot reject the null hypothesis. This is not a significant predictor. It is only significant for particular values of alpha, hence we decide to remove it.
+
+# Fitting a multiple linear regression model on all the variables except 'sex' and 'region'
 
 ```{r}
 lin_model2 <- lm(charges ~ (.-sex-region), data = data)
 summary(lin_model2)
 ```
 
+We observe that all predictors have less p-values and for all the null hypothesis can be rejected. All these predictors are significant for the model. We also observe that with these predictors the model can predict 74.97% of outputs.
+
+# Checking Autocorrelation
+
+```{r}
+library(lmtest)
+dwtest(lin_model2)
+```
+
+DW=2 suggests no autocorrelation
+
+# Plotting graphs to observe problems
+
 ```{r}
 plot(lin_model2)
 ```
 
+From the residual vs fitted graph, we observe that the data shows pattern and is not random, hinting at the presence of heteroscedasticity. From the Q-Q plot, we observe that the data is skewed and not normal. From residuals vs leverage plot, we observe that there are no points that are beyond cook's distance. So, the model does not have influential points.
+
+# Conducting BP Test on model
 
 ```{r}
 library(lmtest)
 bptest(lin_model2)
 ```
+
 The Breusch-Pagan (BP) test indicates that there is heteroscedasticity in the data. So, we proceed to transform the data.
 
 
@@ -56,11 +84,14 @@ summary(log_model)
 plot(log_model)
 ```
 
+# Conducting BP Test on log transformed model
+
 ```{r}
 bptest(log_model)
 ```
 This is indicating that even with the log-transform the heteroscedasticity is still present, so we use square transform.
 
+# Square Transformation
 
 ```{r}
 model_square <- lm((charges^2) ~ age+bmi+children+smoker,data=data)
@@ -68,10 +99,32 @@ summary(model_square)
 
 plot(model_square)
 ```
+
+# Conducting BP Test on square transformed model
+
 ```{r}
 bptest(model_square)
 ```
 This also did not help much with the heteroscedasticity.
+
+# Square Root Transformation
+
+```{r}
+model_square_root <- lm((charges^0.5) ~ age+bmi+children+smoker,data=data)
+summary(model_square_root)
+
+plot(model_square_root)
+```
+
+# Conducting BP Test on square root transformed model
+
+```{r}
+bptest(model_square_root)
+```
+
+Even this does not help with the problem. Another transform that can be used is WLS method.
+
+# Performing transformation by Weighted Least Square (WLS) method
 
 ```{r}
 weights <- 1 / lm(abs(residuals(lin_model2)) ~ fitted(lin_model2))$fitted.values^2
@@ -81,21 +134,59 @@ summary(model_wls)
 plot(model_wls)
 ```
 
+# Conducting BP Test on WLS transformed model
+
 ```{r}
 bptest(model_wls)
 ```
 
-```{r}
-model <- lm(charges ~ age+bmi+children+smoker+bmi*smoker, data = data)
-summary(model)
-```
+The bp test for the model after transforming with WLS indicates that there is no heteroscedasticity.
+
+# Checking multicollinearity
 
 ```{r}
-plot(model)
+library(car)
+vif(model_wls)
 ```
 
+All values are very close to 1 suggesting that there is no issue of multicollinearity
+
+# Model Observation after transform
+
+Age, bmi, children, and smoker are all significant features and together give the model an R-squared value of 0.5538. This means that the features together can predict 55.38% of the outputs. The average charges for a person who smokes is 22725.01 units more than for a non-smoker (keeping all other predictors fixed).
+
+# Interaction term observation
 
 ```{r}
-bptest(model)
+model1<-lm(charges~age+bmi+children+smoker+region+sex+age*bmi+age*children+age*smoker+age*region+age*sex+bmi*children+bmi*smoker+bmi*region+bmi*sex+children*smoker+children*region+children*sex+smoker*region+smoker*sex+region*sex,data=data)
+summary(model1)
 ```
 
+The only significant synergy is bmi with smoker
+
+# Fitting a multiple linear regression model with synergy term
+
+```{r}
+interaction_term_model <- lm(charges ~ age+bmi+children+smoker+bmi*smoker, data = data)
+summary(interaction_term_model)
+```
+
+We observe that the inclusion of synergy term helps the model predict 83.88% of values. This is 28.5% more than the transformed model.
+
+
+
+# Plotting to observe problems
+
+```{r}
+plot(interaction_term_model)
+```
+
+From the residual vs fitted graph, we observe that the data shows pattern and is not random, hinting at the presence of heteroscedasticity. From the Q-Q plot, we observe that the data is skewed and not normal. From residuals vs leverage plot, we observe that there are no points that are beyond cook's distance. So, the model does not have influential points.
+
+# Conducting BP Test
+
+```{r}
+bptest(interaction_term_model)
+```
+
+BP test suggests that there is no heteroscedasticity in this model.
